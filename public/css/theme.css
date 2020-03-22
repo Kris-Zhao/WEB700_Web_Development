@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css?family=Lobster&display=swap');
+
+body,html {
+    background: rgb(159, 77, 214); /* fallback color */
+    background: linear-gradient( to bottom,  rgb(159, 77, 214), white);
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.bg-light {
+    background: rgb(160, 157, 163); /* fallback color */
+    background: linear-gradient( to bottom,rgb(224, 203, 247), white);
+    -webkit-box-shadow: inset -17px -10px 19px -6px rgba(204,196,51,0.8);
+    -moz-box-shadow: inset -17px -10px 19px -6px rgba(204,196,51,0.8);
+    box-shadow: inset -17px -10px 19px -6px rgba(204,196,51,0.8);
+}
+
+nav.navbar-light a.navbar-brand {
+    font-family: 'Lobster';
+    color: orange;
+    text-shadow: 1px 1px 2px pink;
+}
+
+a.nav-link:link {
+    font-family: 'Lobster';
+    color: rgb(226, 79, 165) !important;
+    
+}
+
+a.nav-link:hover {
+    font-family: 'Lobster';
+    color: chocolate !important;
+}
+
+.btn-primary {
+    background-color: burlywood;
+    background: linear-gradient(to bottom, pink, orange);
+    
+    -webkit-box-shadow: 39px 26px 14px -17px rgba(145,141,65,0.74);
+    -moz-box-shadow: 39px 26px 14px -17px rgba(145,141,65,0.74);
+    box-shadow: 39px 26px 14px -17px rgba(145,141,65,0.74);
+    
+}
+.btn-primary:hover {
+    background-color: indianred;
+    background: linear-gradient(to bottom, indianred, orange);
+    
+    box-shadow: inset 39px 26px 14px -17px rgba(64,80,143,1);
+    
+}
+
+table tr:nth-child(odd) {
+    background-color:cadetblue;
+    background: linear-gradient(to bottom, cadetblue,white);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Lobster';
+    color: cyan;
+    text-shadow: 1px 1px 2px cornflowerblue;
+}
+
+a:link, a:hover {
+    color: indianred;
+}
+
+legend {
+    padding-top: 5%;
+    font-family: 'Lobster';
+    color: ivory;
+    text-shadow: 3px 3px 5px ivory;
+}
+
