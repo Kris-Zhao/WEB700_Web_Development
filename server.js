@@ -1,10 +1,10 @@
 /*********************************************************************************
-* WEB700 – Assignment 05
+* WEB700 – Assignment 06
 * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
 * of this assignment has been copied manually or electronically from any other source
 * (including 3rd party web sites) or distributed to other students.
 *
-* Name: _______Yuhang Zhao_______ Student ID: __150467199__ Date: __2020-03-22__
+* Name: _______Yuhang Zhao_______ Student ID: __150467199__ Date: __2020-04-05__
 *
 * Online (Heroku) Link: ____________https://glacial-fjord-85838.herokuapp.com/_____________
 *
@@ -57,14 +57,22 @@ app.use(function(req,res,next){
 app.get("/employees", (req, res) => {
     if(req.query.department == undefined){
         serverDataModule.getALLEmployees().then((data) => {
-            res.render("employees", {employees: data});
+            if(data.length>0){
+                res.render("employees", {employees: data});
+            }else{
+                res.render("employees", {message: "no results"});
+            }   
         }).catch(() => {
             res.render("employess", {message: "no results"});
         });
     }
     else{
         serverDataModule.getEmployeesByDepartment(req.query.department).then((data) => {
-            res.render("employees", {employees: data});
+            if(data.length>0){
+                res.render("employees", {employees: data});
+            }else{
+                res.render("employees", {message: "no results"});
+            }  
         }).catch(() => {
             res.render("employess", {message: "no results"});
         });
@@ -73,16 +81,7 @@ app.get("/employees", (req, res) => {
 });
 
 
-/*
-// setup a 'route' to listen on the /managers
-app.get("/managers", (req, res) => {
-    serverDataModule.getManagers().then(function(data){
-        res.json(data);
-    }).catch(function(){
-        res.json({message:"no results"});
-    })
-});
-*/
+
 
 // setup a 'route' to listen on the /departments
 app.get("/departments", (req, res) => {
@@ -95,20 +94,87 @@ app.get("/departments", (req, res) => {
 
 app.get("/department/:id", (req, res) => {
     serverDataModule.getDepartmentById(req.params.id).then(function(data){
-        res.render("department", { department: data });
+        if(data == undefined){
+            res.status(404).send("Department Not Found");
+        }else{
+            res.render("department", { department: data });
+        }
+    }).catch((err)=>{
+        res.status(500).send("Unable to Find Department with this Id");
     })
 });
 
-// setup a 'route' to listen on the /employee/:num
-app.get("/employee/:num", (req, res) => {
-    serverDataModule.getEmployeeByNum(req.params.num).then(function(data){
-        res.render("employee", { employee: data });
-    })
-    
+app.get("/departments/add", (req, res) => {
+    res.render('addDepartment');
 });
+
+app.post("/departments/add", (req, res) => {
+    serverDataModule.addDepartment(req.body).then(()=>{
+        res.redirect("/departments");
+    }).catch((err)=>{
+        res.status(500).send("Unable to Add Department");
+    });
+});
+
+app.post("/department/update", (req, res) => {
+    //req.body.isManager = (req.body.isManager) ? true : false;
+    //console.log(req.body);
+    serverDataModule.updateDepartment(req.body).then(()=>{
+        res.redirect("/departments");
+    }).catch((err)=>{
+        res.status(500).send("Unable to Update Department");
+    });
+});
+
+app.get("/departments/delete/:id", (req, res) => {
+    serverDataModule.deleteDepartmentById(req.params.id).then(() => {
+        res.redirect("/departments");
+    }).catch((err)=>{
+        res.status(500).send("Unable to Remove Department / Department not found");
+    })
+});
+
+
+
+app.get("/employee/:empNum", (req, res) => {
+    // initialize an empty object to store the values
+    let viewData = {};
+    serverDataModule.getEmployeeByNum(req.params.empNum).then((data) => {
+        if (data) {
+            viewData.employee = data[0]; //store employee data in the "viewData" object as "employee"
+        } else {
+            viewData.employee = null; // set employee to null if none were returned
+        }
+    }).catch(() => {
+        viewData.employee = null; // set employee to null if there was an error
+    }).then(serverDataModule.getDepartments)
+    .then((data) => {
+        viewData.departments = data; // store department data in the "viewData" object as "departments"
+        // loop through viewData.departments and once we have found the departmentId that matches
+        // the employee's "department" value, add a "selected" property to the matching
+        // viewData.departments object
+        for (let i = 0; i < viewData.departments.length; i++) {
+            if (viewData.departments[i].departmentId == viewData.employee.department) {
+                viewData.departments[i].selected = true;
+            }
+        }
+    }).catch(() => {
+        viewData.departments = []; // set departments to empty if there was an error
+    }).then(() => {
+        if (viewData.employee == null) { // if no employee - return an error
+            res.status(404).send("Employee Not Found");
+        } else {
+            res.render("employee", { viewData: viewData }); // render the "employee" view
+        }
+    });
+   });
 
 app.get("/employees/add", (req, res) => {
-    res.render('addEmployee');
+    serverDataModule.getDepartments().then((data)=>{
+        res.render("addEmployee",{departments: data});
+    }).catch((err)=>{
+        res.render("addEmployee",{departments: []});
+    })
 });
 
 app.post("/employees/add", (req, res) => {
@@ -117,7 +183,7 @@ app.post("/employees/add", (req, res) => {
     serverDataModule.addEmployee(req.body).then(()=>{
         res.redirect("/employees");
     }).catch((err)=>{
-        res.status(500).end();
+        res.status(500).send("Unable to Add Employee");
     });
 });
 
@@ -126,9 +192,19 @@ app.post("/employee/update", (req, res) => {
     console.log(req.body);
     serverDataModule.updateEmployee(req.body).then(()=>{
         res.redirect("/employees");
+    }).catch((err)=>{
+        res.status(500).send("Unable to Update Employee");
     })
     
 
+});
+
+app.get("/employees/delete/:empNum", (req, res) => {
+    serverDataModule.deleteEmployeeByNum(req.params.empNum).then(()=>{
+        res.redirect("/employees");
+    }).catch((err)=>{
+        res.status(500).send("Unable to Remove Employee / Employee not found");
+    })
 });
 
 

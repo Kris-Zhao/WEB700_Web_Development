@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 var sequelize = new Sequelize('dei74nlmjjn2n1','nsogtukievakrx','5da4f9190db8e890035de33423145533983067959c9a9ab6f228b651c68118e2',{
-    host:'host',
+    host:'ec2-18-233-137-77.compute-1.amazonaws.com',
     dialect:'postgres',
     port:5432,
     dialectOptions: {
@@ -57,9 +57,9 @@ module.exports.initialzie = function(){
 module.exports.getALLEmployees = function(){
 
     return new Promise(function(resolve,reject){
-        Employee.findAll().then(function(data){
+        Employee.findAll().then((data) => {
             data = data.map(value => value.dataValues);
-            resolve(data)
+            resolve(data);
         }).catch((err)=>{
             reject("no results returned");
         });
@@ -68,22 +68,11 @@ module.exports.getALLEmployees = function(){
 
 
 
-module.exports.getManagers = function(){
-
-    let managers = [];
-
-    return new Promise(function(resolve,reject){
-
-        reject();
-        })
-}
-
-
 module.exports.getDepartments = function(){
 
     return new Promise(function(resolve,reject){
         Department.findAll().then((data)=>{
-            data = data.map(values=>value.dataValues);
+            data = data.map(value => value.dataValues);
             resolve(data);
         }).catch((err)=>{
             reject("no results returned");
@@ -91,8 +80,23 @@ module.exports.getDepartments = function(){
     })
 }
 
+module.exports.deleteEmployeeByNum = function(empNum){
+    
+    return new Promise(function(resolve,reject){
+        Employee.destroy({
+            where: {
+                employeeNum: empNum
+            }
+        }).then(()=>{
+            resolve();
+        }).catch((err)=>{
+            reject();
+        })
+    });
+}
+
 module.exports.getEmployeesByDepartment = function(department){
-    //let employeesByDepartment = [];
+
     return new Promise(function(resolve,reject){
         Employee.findAll({
             where: {
@@ -124,17 +128,25 @@ module.exports.getEmployeeByNum = function(num){
 }
 
 module.exports.getDepartmentById = function(id){
-    //let singleDepartment;
     return new Promise(function(resolve,reject){
-        reject();
+        Department.findAll({
+            where: {
+                departmentId: id
+            }
+        }).then((data)=>{
+            data = data.map(value => value.dataValues);
+            resolve(data[0]);
+        }).catch((err)=>{
+            reject("no results returned");
+        })
     })
 }
 
 module.exports.addEmployee = function(employeeObject){
-    employeeObject.isManager = (employeeObject.isManager)?true:false;
-    for(const prop in employeeObject){
-        if(employeeObject.prop == "") {
-            employeeObject.prop = null; //??????????????????
+    employeeObject.isManager = (employeeObject.isManager) ? true : false;
+    for(var prop in employeeObject){
+        if(employeeObject[prop] == "") {
+            employeeObject[prop] = null; //??????????????????
         }
     }
     return new Promise((resolve,reject) => {
@@ -151,11 +163,12 @@ module.exports.addEmployee = function(employeeObject){
             isManager: employeeObject.isManager,
             employeeManagerNum: employeeObject.employeeManagerNum,
             status: employeeObject.status,
-            hireDate: employeeObject.hireDate
-        }).then((data)=>{
-            resolve(data);
+            hireDate: employeeObject.hireDate,
+            department: employeeObject.department
+        }).then(()=>{
+            resolve();
         }).catch((err)=>{
-            reject("unable to update employee");
+            reject("unable to create employee");
         })
     })
     
@@ -163,9 +176,9 @@ module.exports.addEmployee = function(employeeObject){
 
 module.exports.updateEmployee = function(employeeData){
     employeeData.isManager = (employeeData.isManager)?true:false;
-    for(const prop in employeeData){
-        if(employeeData.prop == "") {
-            employeeData.prop = null; //??????????????????
+    for(var prop in employeeData){
+        if(employeeData[prop] == "") {
+            employeeData[prop] = null; //??????????????????
         }
     }
     return new Promise((resolve,reject) => {
@@ -187,10 +200,67 @@ module.exports.updateEmployee = function(employeeData){
             where: {
                 employeeNum: employeeData.employeeNum
             }
-        }).then((data)=>{
-            resolve(data);
+        }).then(()=>{
+            resolve();
         }).catch((err)=>{
             reject("unable to update employee");
+        })
+    })
+}
+
+
+module.exports.addDepartment = function(departmentData) {
+    
+    for(var prop in departmentData){
+        if(departmentData.prop == "") {
+            departmentData.prop = null; //??????????????????
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        Department.create({
+            departmentId: departmentData.departmentId,
+            departmentName: departmentData.departmentName
+        }).then(()=>{
+            resolve();
+        }).catch((err)=>{
+            reject("unable to create department");
+        })
+    });
+}
+
+module.exports.updateDepartment = function(departmentData) {
+    for(const prop in departmentData){
+        if(departmentData.prop == "") {
+            departmentData.prop = null; //??????????????????
+        }
+    }
+    return new Promise((resolve, reject) => {
+        Department.update({
+            departmentName: departmentData.departmentName
+        },{
+            where: {
+                departmentId : departmentData.departmentId
+            }
+        }).then(()=>{
+            resolve();
+        }).catch((err)=>{
+            reject("unable to update department");
+        })
+    })
+
+}
+
+module.exports.deleteDepartmentById = function(id) {
+    return new Promise((resolve, reject) => {
+        Department.destroy({
+            where: {
+                departmentId: id
+            }
+        }).then(()=>{
+            resolve();
+        }).catch((err)=>{
+            reject("unable to delete department");
         })
     })
 }
